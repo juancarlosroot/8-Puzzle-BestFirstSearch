@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">8 Puzzle Solver</string>
+    <string name="button_reset">Reset</string>
+    <string name="button_previous">Previous</string>
+    <string name="button_start">Start</string>
+    <string name="button_next">Next</string>
+    <string name="label_moves">Moves: </string>
+    <string name="label_p">P: </string>
+    <string name="label_q">Q: </string>
+</resources>
