@@ -8,6 +8,10 @@ import codecuack.a8puzzlesolver.BFS.Block;
 /**
  * Created by juancarlosroot on 9/12/16.
  */
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.ArrayList;
 
@@ -15,13 +19,16 @@ public class BestFirstSearch
 {
     public float in_fHeuristicModifier;
     String TAG = getClass().getName().toString();
-    int mArray[][] =  {{8,3,5}, {4,1,6}, {2,7,0}};
+
     int sArray[][] = {{1,2,3}, {8,0,4}, {7,6,5}};
     int xArray[] = new int[sArray.length*sArray.length];
     int yArray[] = new int[sArray.length*sArray.length];
     ArrayList< Block > m_ClosedList;
-    ArrayList< Block > m_OpenList;
     ArrayList< Block > m_PathList;
+    PriorityQueue<Block> blockQueue;
+    HashSet<Block> mHashSetAll;
+
+
     ArrayList< Block > board;
     boolean isFinish = false;
     Block mActualBlock;
@@ -29,11 +36,24 @@ public class BestFirstSearch
     float m_fG_PrecedenceModifier;
     boolean m_bIsManhattan;
     long startTime;
-    public BestFirstSearch(int in_iDimensions, boolean in_bIsManhattan, float in_fHeuristicModifier, float in_fG_precedenceModifier, int [][] mArray){
-        this.m_OpenList = new ArrayList<Block>();
-        this.m_ClosedList = new ArrayList<Block>();
+    public BestFirstSearch(int in_iDimensions, boolean in_bIsManhattan, float in_fHeuristicModifier, float in_fG_precedenceModifier, Integer [][] mArray){
+
         this.board = new ArrayList<Block>();
         this.m_PathList = new ArrayList<Block>();
+        this.m_ClosedList = new ArrayList<Block>();
+        this.blockQueue = new PriorityQueue<Block>(10, new Comparator<Block>() {
+            @Override
+            public int compare(Block lhs, Block rhs) {
+                if (lhs.m_fFinalValue < rhs.m_fFinalValue) {
+                    return -1;
+                }
+                if (lhs.m_fFinalValue > rhs.m_fFinalValue) {
+                    return 1;
+                }
+                return 0;
+            }
+        });
+        this.mHashSetAll = new HashSet<Block>();
 
         this.m_iNdimension = in_iDimensions;
         this.m_bIsManhattan = in_bIsManhattan;
@@ -46,10 +66,6 @@ public class BestFirstSearch
 
     public ArrayList<Block> getM_PathList() {
         return m_PathList;
-    }
-
-    public void setM_PathList(ArrayList<Block> m_PathList) {
-        this.m_PathList = m_PathList;
     }
 
     public boolean isFinish() {
@@ -73,17 +89,12 @@ public class BestFirstSearch
             bIsFound = true;
         }
 
-
-
-
         int c = 0;
-        this.m_OpenList.add(mActualBlock);
+        this.blockQueue.add(mActualBlock);
 
-
-        while( this.m_OpenList.size() > 0 && !bIsFound )
+        while( this.blockQueue.size() > 0 && !bIsFound )
         {
-            this.mActualBlock = this.m_OpenList.get(0);
-            this.m_OpenList.remove(0);
+            this.mActualBlock = blockQueue.poll();
 
             this.m_ClosedList.add(this.mActualBlock);
 
@@ -93,7 +104,7 @@ public class BestFirstSearch
             int iPastX = (this.mActualBlock.parent != null?this.mActualBlock.parent.x:this.mActualBlock.x);
             int iPastY = (this.mActualBlock.parent != null?this.mActualBlock.parent.y:this.mActualBlock.y);
 
-            int [][]iActualM = this.mActualBlock.mArray;
+            Integer [][]iActualM = this.mActualBlock.mArray;
 
             Block TempNode =
                     new Block(iActualM);
@@ -129,7 +140,6 @@ public class BestFirstSearch
                     bIsFound = true;
                     break;
                 }
-                //TempNode.setMArray(swapPositions(TempNode, 0, 1));
             }
 
             TempNode =
@@ -165,7 +175,7 @@ public class BestFirstSearch
         System.out.println(this.mActualBlock.m_fG_Precedence);
 
         this.m_PathList.add(this.mActualBlock);
-        while(back.m_fG_Precedence != 0)
+        while(back != null&& back.m_fG_Precedence != 0)
         {
             this.m_PathList.add(back);
             back =  back.parent;
@@ -176,9 +186,9 @@ public class BestFirstSearch
 
     private boolean AnalyzeNode(Block in_pActualNode, Block in_pNodeToCheck)
     {
-        if( ! ( this.m_ClosedList.contains(in_pNodeToCheck) || this.m_OpenList.contains(in_pNodeToCheck)) )
+        if(this.mHashSetAll.add(in_pNodeToCheck))
         {
-            Block temp = new Block(in_pActualNode.mArray);;
+            //Block temp = new Block(in_pActualNode.mArray);;
             //in_pActualNode.printM();
 
             in_pNodeToCheck.setParent( in_pActualNode);
@@ -196,7 +206,8 @@ public class BestFirstSearch
             in_pNodeToCheck.setM_fFinalValue(in_pNodeToCheck.m_fHeuristic + in_pNodeToCheck.m_fG_Precedence);
             //The sum of both H and G.
 
-            InsertByValue(in_pNodeToCheck, this.m_OpenList);
+            //InsertByValue(in_pNodeToCheck, this.m_OpenList);
+            this.blockQueue.add(in_pNodeToCheck);
 
             return false;
         }
@@ -217,27 +228,7 @@ public class BestFirstSearch
         }
         //In case it was the highest cost, place it on the back of the list.
         in_DestinationList.add(in_NodeToInsert);
-    }
 
-    boolean CustomContains(Block in_NodeToInsert, ArrayList< Block >  in_DestinationList)
-    {
-        int c = 0;
-        for( int i = 0 ; i < in_DestinationList.size(); i++ )
-        {
-            c = 0;
-            for(int x = 0 ; x < m_iNdimension ; x++){
-                for(int y = 0 ; y < m_iNdimension ; y++){
-                    if(in_DestinationList.get(i).mArray[x][y] == in_NodeToInsert.mArray[x][y] )
-                    {
-                        c++;
-                    }
-                }
-                if(c == 9)
-                    return true;
-            }
-
-        }
-        return false;
     }
 
     private int difference(Block in_pNodeToCheck){
@@ -257,7 +248,7 @@ public class BestFirstSearch
     }
 
     private void swapPositions(Block pActualNode, int iActualX, int iActualY) {
-        int [][] nArray = pActualNode.mArray;
+        Integer [][] nArray = pActualNode.mArray;
 
         int m_iTempSwap = nArray[pActualNode.x + iActualX][pActualNode.y + iActualY];
 
@@ -271,11 +262,6 @@ public class BestFirstSearch
         pActualNode.setY(pActualNode.y + iActualY);
 
         pActualNode.setMArray(nArray);
-    }
-
-    private void mPrint(String text)
-    {
-        System.out.println(text);
     }
 
     private void createInitPositions()
@@ -293,7 +279,7 @@ public class BestFirstSearch
         return m_ClosedList;
     }
 
-    public ArrayList<Block> getM_OpenList() {
-        return m_OpenList;
+    public PriorityQueue<Block> getBlockQueue() {
+        return blockQueue;
     }
 }

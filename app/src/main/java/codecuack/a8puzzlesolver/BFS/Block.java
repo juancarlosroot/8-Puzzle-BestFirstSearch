@@ -3,17 +3,17 @@ package codecuack.a8puzzlesolver.BFS;
 /**
  * Created by juancarlosroot on 9/19/16.
  */
-public class Block{
+public class Block {
     float m_fHeuristic;
     float m_fG_Precedence;
     float m_fFinalValue;
-    int mArray[][];
+    Integer mArray[][];
     int x;
     int y;
     Block parent;
-    int sArray[][] = {{1,2,3}, {8,0,4}, {7,6,5}};
+    Integer sArray[][] = {{1,2,3}, {8,0,4}, {7,6,5}};
 
-    public Block(int [][] mArray)
+    public Block(Integer [][] mArray)
     {
         this.parent = null;
         this.m_fHeuristic = 0.0f;
@@ -42,15 +42,15 @@ public class Block{
         this.m_fFinalValue = m_fFinalValue;
     }
 
-    public void setMArray(int [][] mArray) {
-        this.mArray = new int [mArray.length][mArray.length];
+    public void setMArray(Integer [][] mArray) {
+        this.mArray = new Integer[mArray.length][mArray.length];
         for (int x = 0; x < sArray.length; x++) {
             for (int y = 0; y < sArray.length; y++)
                 this.mArray[x][y] = mArray[x][y];
         }
     }
 
-    public int[][] getmArray() {
+    public Integer[][] getmArray() {
         return mArray;
     }
 
@@ -80,6 +80,22 @@ public class Block{
                     this.x = x;
                     this.y = y;
                 }
+    }
 
+
+
+    public int hashCode()
+    {
+        String toParse = "";
+        for (int x = 0; x < mArray.length; x++)
+            for (int y = 0; y < mArray.length; y++)
+                toParse += mArray[x][y];
+
+        return Integer.parseInt(toParse);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return this.hashCode() == o.hashCode();
     }
 }

@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     Button nextButton;
     Button prevButton;
 
-    int mArray[][];
+    Integer mArray[][];
     ArrayList<Block> m_PathList;
     int lastMove;
     String TAG = getClass().getName().toString();
@@ -38,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mRelative = (RelativeLayout) findViewById(R.id.relativeLayout);
 
+
+
         resetButton = (Button) findViewById(R.id.button_reset);
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
                 resetMatrixUI();
                 nextButton.setVisibility(View.INVISIBLE);
                 prevButton.setVisibility(View.INVISIBLE);
+                playButton.setVisibility(View.VISIBLE);
                 showAlert("Values erased");
             }
         });
@@ -68,8 +71,6 @@ public class MainActivity extends AppCompatActivity {
                     new BestFSTask().execute(mArray);
                     playButton.setVisibility(View.INVISIBLE);
                 }
-
-
             }
         });
 
@@ -141,8 +142,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    int[][] getMatrixUI(){
-        int newArray[][] = new int[3][3];
+    Integer[][] getMatrixUI(){
+        Integer newArray[][] = new Integer[3][3];
         TextView textViewArray[] = {textView00, textView01, textView02, textView10, textView11, textView12, textView20, textView21, textView22};
         int []cs = new int[textViewArray.length];
 
@@ -217,10 +218,6 @@ public class MainActivity extends AppCompatActivity {
                 a = rand.nextInt((8 - 0) + 1) + 0;
                 b = rand.nextInt((8 - 0) + 1) + 0;
             }
-            //int a1 = Integer.parseInt(textViewArray[a].getText().toString());
-            //int b1 = Integer.parseInt(textViewArray[b].getText().toString());
-
-
 
             String c = textViewArray[b].getText().toString();
             textViewArray[b].setText(textViewArray[a].getText().toString());
@@ -230,23 +227,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private class BestFSTask extends AsyncTask<int [][], Integer, BestFirstSearch> {
+    private class BestFSTask extends AsyncTask<Integer [][], Integer, BestFirstSearch> {
         @Override
-        protected BestFirstSearch doInBackground(int [][] ... params) {
-            Log.i(TAG, " dddd *****" );
-            BestFirstSearch bfs = new BestFirstSearch(3, true, 1, 1, params[0]);
+        protected BestFirstSearch doInBackground(Integer [][] ... params) {
+            BestFirstSearch bfs = new BestFirstSearch(3, false, 1, 1, params[0]);
             bfs.BestFS();
-            Log.i(TAG, "1dddd *****" );
+
             long mTStart = System.currentTimeMillis();
-            Log.i(TAG, " 2dddd *****" );
+
             while (!bfs.isFinish())
             {
                 publishProgress((int) (System.currentTimeMillis() - (System.currentTimeMillis()) / 1000));
-                Log.d(TAG, " 3dddd *****" + (System.currentTimeMillis() - (System.currentTimeMillis()) / 1000) );
             }
 
-            Log.e(TAG, "Array Size : " + mTStart);
-            Log.i(TAG, "******* : " + mTStart);
+            Log.e(TAG, "Tstart : " + mTStart);
+            Log.i(TAG, "TEnd   : " + mTStart);
             return bfs;
         }
 
@@ -263,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
             nextButton.setVisibility(View.VISIBLE);
             textViewMoves.setText(Integer.toString(lastMove));
             textViewQ.setText(Integer.toString(bfs.getM_ClosedList().size()));
-            textViewP.setText(Integer.toString(bfs.getM_OpenList().size()));
+            textViewP.setText(Integer.toString(bfs.getBlockQueue().size()));
             showAlert("Done");
         }
     }
