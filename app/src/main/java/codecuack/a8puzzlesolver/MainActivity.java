@@ -1,14 +1,12 @@
 package codecuack.a8puzzlesolver;
 
 import android.os.AsyncTask;
-import android.support.annotation.IntegerRes;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.GridLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -17,7 +15,15 @@ import java.util.Random;
 
 import codecuack.a8puzzlesolver.BFS.BestFirstSearch;
 import codecuack.a8puzzlesolver.BFS.Block;
-
+/*
+* @startuml
+*
+* MainActivity -> BestFirstSearch : hallo
+*
+*
+*
+* @enduml
+* */
 public class MainActivity extends AppCompatActivity {
     TextView textView00, textView01, textView02, textView10, textView11, textView12, textView20, textView21, textView22;
     TextView textViewP, textViewQ, textViewMoves;
@@ -235,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
 
             long mTStart = System.currentTimeMillis();
 
-            while (!bfs.isFinish())
+            while (!bfs.isM_bFinish())
             {
                 publishProgress((int) (System.currentTimeMillis() - (System.currentTimeMillis()) / 1000));
             }
@@ -257,8 +263,8 @@ public class MainActivity extends AppCompatActivity {
             lastMove = m_PathList.size() - 1;
             nextButton.setVisibility(View.VISIBLE);
             textViewMoves.setText(Integer.toString(lastMove));
-            textViewQ.setText(Integer.toString(bfs.getM_ClosedList().size()));
-            textViewP.setText(Integer.toString(bfs.getBlockQueue().size()));
+            textViewQ.setText(Integer.toString(bfs.getmHashSetAll().size()));
+            textViewP.setText(Integer.toString(bfs.getM_OpenList().size()));
             showAlert("Done");
         }
     }

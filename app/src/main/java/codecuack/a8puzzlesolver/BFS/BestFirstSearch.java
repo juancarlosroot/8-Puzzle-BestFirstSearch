@@ -1,47 +1,41 @@
 package codecuack.a8puzzlesolver.BFS;
 
-import android.util.Log;
-
 import java.util.ArrayList;
-import codecuack.a8puzzlesolver.BFS.Block;
 
 /**
  * Created by juancarlosroot on 9/12/16.
  */
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.ArrayList;
 
 public class BestFirstSearch
 {
     public float in_fHeuristicModifier;
     String TAG = getClass().getName().toString();
 
-    int sArray[][] = {{1,2,3}, {8,0,4}, {7,6,5}};
-    int xArray[] = new int[sArray.length*sArray.length];
-    int yArray[] = new int[sArray.length*sArray.length];
+    int i_FinalArray[][] = {{1,2,3}, {8,0,4}, {7,6,5}};
+    int i_XArray[] = new int[i_FinalArray.length* i_FinalArray.length];
+    int i_YArray[] = new int[i_FinalArray.length* i_FinalArray.length];
     ArrayList< Block > m_ClosedList;
     ArrayList< Block > m_PathList;
-    PriorityQueue<Block> blockQueue;
+    PriorityQueue<Block> m_OpenList;
     HashSet<Block> mHashSetAll;
 
 
     ArrayList< Block > board;
-    boolean isFinish = false;
-    Block mActualBlock;
+    boolean m_bFinish = false;
+    Block m_ActualBlock;
     int m_iNdimension;
     float m_fG_PrecedenceModifier;
     boolean m_bIsManhattan;
-    long startTime;
+    long l_StartTime;
     public BestFirstSearch(int in_iDimensions, boolean in_bIsManhattan, float in_fHeuristicModifier, float in_fG_precedenceModifier, Integer [][] mArray){
 
         this.board = new ArrayList<Block>();
         this.m_PathList = new ArrayList<Block>();
         this.m_ClosedList = new ArrayList<Block>();
-        this.blockQueue = new PriorityQueue<Block>(10, new Comparator<Block>() {
+        this.m_OpenList = new PriorityQueue<Block>(10, new Comparator<Block>() {
             @Override
             public int compare(Block lhs, Block rhs) {
                 if (lhs.m_fFinalValue < rhs.m_fFinalValue) {
@@ -60,7 +54,7 @@ public class BestFirstSearch
         this.in_fHeuristicModifier = in_fHeuristicModifier;
         this.m_fG_PrecedenceModifier = in_fG_precedenceModifier;
 
-        this.mActualBlock = new Block(mArray);
+        this.m_ActualBlock = new Block(mArray);
         createInitPositions();
     }
 
@@ -68,50 +62,50 @@ public class BestFirstSearch
         return m_PathList;
     }
 
-    public boolean isFinish() {
-        return isFinish;
+    public boolean isM_bFinish() {
+        return m_bFinish;
     }
 
-    public void setFinish(boolean finish) {
-        isFinish = finish;
+    private void setM_bFinish(boolean m_bFinish) {
+        this.m_bFinish = m_bFinish;
     }
     public long getTimeElapsed(){
-        return System.currentTimeMillis() - startTime;
+        return System.currentTimeMillis() - l_StartTime;
     }
 
     public boolean BestFS()
     {
-        this.startTime = System.currentTimeMillis();
+        this.l_StartTime = System.currentTimeMillis();
         boolean bIsFound = false;
 
-        if(difference(mActualBlock) == 0)
+        if(difference(m_ActualBlock) == 0)
         {
             bIsFound = true;
         }
 
         int c = 0;
-        this.blockQueue.add(mActualBlock);
+        this.m_OpenList.add(m_ActualBlock);
 
-        while( this.blockQueue.size() > 0 && !bIsFound )
+        while( this.m_OpenList.size() > 0 && !bIsFound )
         {
-            this.mActualBlock = blockQueue.poll();
+            this.m_ActualBlock = m_OpenList.poll();
 
-            this.m_ClosedList.add(this.mActualBlock);
+            //this.m_ClosedList.add(this.m_ActualBlock);
 
-            int iActualX = this.mActualBlock.x;
-            int iActualY = this.mActualBlock.y;
+            int iActualX = this.m_ActualBlock.x;
+            int iActualY = this.m_ActualBlock.y;
 
-            int iPastX = (this.mActualBlock.parent != null?this.mActualBlock.parent.x:this.mActualBlock.x);
-            int iPastY = (this.mActualBlock.parent != null?this.mActualBlock.parent.y:this.mActualBlock.y);
+            int iPastX = (this.m_ActualBlock.parent != null?this.m_ActualBlock.parent.x:this.m_ActualBlock.x);
+            int iPastY = (this.m_ActualBlock.parent != null?this.m_ActualBlock.parent.y:this.m_ActualBlock.y);
 
-            Integer [][]iActualM = this.mActualBlock.mArray;
+            Integer [][]iActualM = this.m_ActualBlock.mArray;
 
             Block TempNode =
                     new Block(iActualM);
             if( iActualX-1 > -1 && iPastX != iActualX-1 )
             {
                 swapPositions(TempNode, -1, 0);
-                if( AnalyzeNode( mActualBlock, TempNode) )
+                if( AnalyzeNode(m_ActualBlock, TempNode) )
                 {
                     bIsFound = true;
                     break;
@@ -123,7 +117,7 @@ public class BestFirstSearch
             if( iActualX+1 < m_iNdimension && iPastX != iActualX+1 ) //n is the size of the array.
             {
                 swapPositions(TempNode, 1, 0);
-                if( AnalyzeNode( mActualBlock, TempNode ) ) //Call the function to check if it is the final node, or to check //if it can have a better value on the open list.
+                if( AnalyzeNode(m_ActualBlock, TempNode ) ) //Call the function to check if it is the final node, or to check //if it can have a better value on the open list.
                 {
                     bIsFound = true;
                     break;
@@ -135,7 +129,7 @@ public class BestFirstSearch
             if( iActualY-1 > -1 && iPastY != iActualY-1)
             {
                 swapPositions(TempNode, 0, -1);
-                if( AnalyzeNode( mActualBlock, TempNode ) ) //Call the function to check if it is the final node, or to check //if it can have a better value on the open list.
+                if( AnalyzeNode(m_ActualBlock, TempNode ) ) //Call the function to check if it is the final node, or to check //if it can have a better value on the open list.
                 {
                     bIsFound = true;
                     break;
@@ -148,7 +142,7 @@ public class BestFirstSearch
             if( iActualY+1 < m_iNdimension && iPastY != iActualY+1)
             {
                 swapPositions(TempNode, 0, 1);
-                if( AnalyzeNode( mActualBlock, TempNode ) ) //Call the function to check if it is the final node, or to check //if it can have a better value on the open list.
+                if( AnalyzeNode(m_ActualBlock, TempNode ) ) //Call the function to check if it is the final node, or to check //if it can have a better value on the open list.
                 {
                     bIsFound = true;
                     break;
@@ -159,22 +153,22 @@ public class BestFirstSearch
         if( bIsFound == true )
         {
             MakeBacktrack();//Get the final route, stored inside the class's Backtrack ArrayList.
-            setFinish(true);
+            setM_bFinish(true);
             return true;
         }
 
-        setFinish(bIsFound);
+        setM_bFinish(bIsFound);
         return bIsFound;
 
     }
 
     private void MakeBacktrack()
     {
-        Block back = this.mActualBlock.parent;
+        Block back = this.m_ActualBlock.parent;
         int c = 0;
-        System.out.println(this.mActualBlock.m_fG_Precedence);
+        System.out.println(this.m_ActualBlock.m_fG_Precedence);
 
-        this.m_PathList.add(this.mActualBlock);
+        this.m_PathList.add(this.m_ActualBlock);
         while(back != null&& back.m_fG_Precedence != 0)
         {
             this.m_PathList.add(back);
@@ -199,7 +193,7 @@ public class BestFirstSearch
 
             if( in_pNodeToCheck.m_fHeuristic == 0 )
             {
-                this.mActualBlock = in_pNodeToCheck;
+                this.m_ActualBlock = in_pNodeToCheck;
                 return true;
             }
 
@@ -207,7 +201,7 @@ public class BestFirstSearch
             //The sum of both H and G.
 
             //InsertByValue(in_pNodeToCheck, this.m_OpenList);
-            this.blockQueue.add(in_pNodeToCheck);
+            this.m_OpenList.add(in_pNodeToCheck);
 
             return false;
         }
@@ -233,14 +227,14 @@ public class BestFirstSearch
 
     private int difference(Block in_pNodeToCheck){
         int diff_c = 0;
-        for (int x = 0; x < sArray.length; x++) {
-            for (int y = 0; y < sArray.length; y++) {
+        for (int x = 0; x < i_FinalArray.length; x++) {
+            for (int y = 0; y < i_FinalArray.length; y++) {
                 if (this.m_bIsManhattan) {
-                    if (in_pNodeToCheck.mArray[x][y] != sArray[x][y])
-                        diff_c += (Math.abs(xArray[in_pNodeToCheck.mArray[x][y]] - x) + Math.abs(yArray[in_pNodeToCheck.mArray[x][y]] - y)) * in_fHeuristicModifier;
+                    if (in_pNodeToCheck.mArray[x][y] != i_FinalArray[x][y])
+                        diff_c += (Math.abs(i_XArray[in_pNodeToCheck.mArray[x][y]] - x) + Math.abs(i_YArray[in_pNodeToCheck.mArray[x][y]] - y)) * in_fHeuristicModifier;
                 }
                 else {
-                    diff_c += (in_pNodeToCheck.mArray[x][y] != sArray[x][y] ? 1 : 0);
+                    diff_c += (in_pNodeToCheck.mArray[x][y] != i_FinalArray[x][y] ? 1 : 0);
                 }
             }
         }
@@ -267,19 +261,19 @@ public class BestFirstSearch
     private void createInitPositions()
     {
         int c = 0;
-        for (int x = 0; x < sArray.length; x++)
-            for (int y = 0; y < sArray.length; y++)
+        for (int x = 0; x < i_FinalArray.length; x++)
+            for (int y = 0; y < i_FinalArray.length; y++)
             {
-                this.xArray[this.sArray[x][y]] = x;
-                this.yArray[this.sArray[x][y]] = y;
+                this.i_XArray[this.i_FinalArray[x][y]] = x;
+                this.i_YArray[this.i_FinalArray[x][y]] = y;
             }
     }
 
-    public ArrayList<Block> getM_ClosedList() {
-        return m_ClosedList;
+    public PriorityQueue<Block> getM_OpenList() {
+        return m_OpenList;
     }
 
-    public PriorityQueue<Block> getBlockQueue() {
-        return blockQueue;
+    public HashSet<Block> getmHashSetAll() {
+        return mHashSetAll;
     }
 }
